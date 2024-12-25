@@ -36,7 +36,7 @@ class LeafNode(HTMLNode):
             try: 
                 raise ValueError
             except ValueError as e:
-                print(f"There is no value in {self}.")
+                print(f"There is no value in {self}: {e}")
         if self.tag is None:
             #return raw text
             return self.value
@@ -48,3 +48,28 @@ class LeafNode(HTMLNode):
     
     def __repr__(self):
         return f"LeafNode({self.value}, {self.tag}, {self.props})"
+
+class ParentNode(HTMLNode):
+    #any HTML node that has children is a parent node
+    def __init__(self, tag, children, props=None):
+        self.tag = tag
+        self.children = children
+        self.props = props
+
+    def to_html(self):
+        def generate_html(node):
+            #base case: there's no more children (list of nodes)    
+            if isinstance(node, LeafNode):
+                return node.to_html() 
+            html_string = ""
+            for element in node.children:
+                #for each element in the child list, run generate_html(node) on it
+                html_string += generate_html(element)
+            return f"<{node.tag} {node.props_to_html()}>{html_string}</{node.tag}>"
+        
+        if self.tag is None:
+            raise ValueError(f"{self} has an invalid tag")
+        if self.children is None:
+            raise ValueError(f"{self} node must have children.")
+        html_string = generate_html(self)
+        return generate_html(self)
