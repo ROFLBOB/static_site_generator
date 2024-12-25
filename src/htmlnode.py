@@ -16,6 +16,8 @@ class HTMLNode:
         #convert the props dict to a string
         #eg href="https://google.com" target="__blank"
         prop_string = ""
+        if self.props is None:
+            return prop_string
         for key, value in self.props.items():
             prop_string += f' {key}="{value}"' 
         print(f"Converting prop item to html: {prop_string}")
@@ -52,10 +54,8 @@ class LeafNode(HTMLNode):
 class ParentNode(HTMLNode):
     #any HTML node that has children is a parent node
     def __init__(self, tag, children, props=None):
-        self.tag = tag
-        self.children = children
-        self.props = props
-
+        super().__init__(tag, None, children, props)
+        
     def to_html(self):
         def generate_html(node):
             #base case: there's no more children (list of nodes)    
@@ -71,5 +71,8 @@ class ParentNode(HTMLNode):
             raise ValueError(f"{self} has an invalid tag")
         if self.children is None:
             raise ValueError(f"{self} node must have children.")
-        html_string = generate_html(self)
         return generate_html(self)
+
+    def __repr__(self):
+        return f"ParentNode({self.tag}, {self.children}, {self.props})"
+    
