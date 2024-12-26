@@ -26,7 +26,7 @@ class TestTextNode(unittest.TestCase):
     
     def test_images(self):
         node = TextNode("URL", TextType.NORMAL, "https://google.com")
-        node2 = TextNode("URL", TextType.IMAGES, "https://discord.com")
+        node2 = TextNode("URL", TextType.IMAGE, "https://discord.com")
         self.assertNotEqual(node, node2)
 
 if __name__ == "__main__":

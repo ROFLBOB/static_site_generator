@@ -27,7 +27,6 @@ class TestLeafNode(unittest.TestCase):
         print(leaf2)
 
 
-
 if __name__ == "__main__":
     unittest.main()
 

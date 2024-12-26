@@ -23,7 +23,7 @@ paragraph_node2 = ParentNode(
 
 
 
-class TestLeafNode(unittest.TestCase):
+class TestParentNode(unittest.TestCase):
     def test_eq(self):
         print("Testing the test_eq function:")
         return self.assertNotEqual(paragraph_node2, paragraph_node)
@@ -35,6 +35,10 @@ class TestLeafNode(unittest.TestCase):
     def test_printing(self):
         print("Testing the test_printing function:")
         print(paragraph_node)
+
+    def test_nested_parent_nodes(self):
+        print(ParentNode("div", [ParentNode("p", [LeafNode("this is a paragraph",None,None)], {"font-size":"18px"}),LeafNode("Click Here","input",{"background-color":"purple"})], {"color":"red", "text-decoration":"underline"}).to_html())
+        
 
 
 
