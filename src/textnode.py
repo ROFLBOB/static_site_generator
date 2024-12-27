@@ -51,5 +51,3 @@ def test_text_node_to_html_node():
     print(text_node_to_html_node(TextNode("coded text",TextType.CODE, None)).to_html())
     print(text_node_to_html_node(TextNode("a link to googs",TextType.LINK, "https://google.com")).to_html())
     print(text_node_to_html_node(TextNode("an image",TextType.IMAGE, None)))
-
-test_text_node_to_html_node()
