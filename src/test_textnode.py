@@ -10,22 +10,22 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(node, node2)
 
     def test_caps(self):
-        node = TextNode("This is a text node", TextType.NORMAL)
-        node2 = TextNode("THIS IS A TEXT NODE", TextType.NORMAL)
+        node = TextNode("This is a text node", TextType.TEXT)
+        node2 = TextNode("THIS IS A TEXT NODE", TextType.TEXT)
         self.assertNotEqual(node, node2)
 
     def test_url(self):
-        node = TextNode("URL", TextType.NORMAL, "https://google.com")
-        node2 = TextNode("URL", TextType.NORMAL, "https://discord.com")
+        node = TextNode("URL", TextType.TEXT, "https://google.com")
+        node2 = TextNode("URL", TextType.TEXT, "https://discord.com")
         self.assertNotEqual(node, node2)
 
     def test_code(self):
-        node = TextNode("URL", TextType.NORMAL, "https://google.com")
+        node = TextNode("URL", TextType.TEXT, "https://google.com")
         node2 = TextNode("URL", TextType.CODE, "https://discord.com")
         self.assertNotEqual(node, node2)
     
     def test_images(self):
-        node = TextNode("URL", TextType.NORMAL, "https://google.com")
+        node = TextNode("URL", TextType.TEXT, "https://google.com")
         node2 = TextNode("URL", TextType.IMAGE, "https://discord.com")
         self.assertNotEqual(node, node2)
 

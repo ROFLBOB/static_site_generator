@@ -1,0 +1,34 @@
+import unittest
+from code_logic import split_nodes_delimiter
+from textnode import TextNode, TextType
+
+class TestMarkdownParser(unittest.TestCase):
+    def test_code_delimiters(self):
+        node = TextNode("This is `code` text", TextType.TEXT)
+        nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertEqual(len(nodes), 3)
+        self.assertEqual(nodes[0].text, "This is ")
+        self.assertEqual(nodes[1].text, "code")
+        self.assertEqual(nodes[1].text_type, TextType.CODE)
+        self.assertEqual(nodes[2].text, " text")
+    
+    def test_multiple_code_blocks(self):
+        node = TextNode("This is `code` and `more code` here", TextType.TEXT)
+        nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertEqual(len(nodes), 5)
+        self.assertEqual(nodes[1].text_type, TextType.CODE)
+        self.assertEqual(nodes[3].text_type, TextType.CODE)
+    
+    def test_bold_delimiters(self):
+        node = TextNode("This is **bold** text", TextType.TEXT)
+        nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
+        self.assertEqual(len(nodes), 3)
+        self.assertEqual(nodes[1].text_type, TextType.BOLD)
+
+    def test_invalid_delimiter(self):
+        node = TextNode("This is `code without closing", TextType.TEXT)
+        with self.assertRaises(ValueError):
+            split_nodes_delimiter([node], "`", TextType.CODE)
+
+if __name__ == "__main__":
+    unittest.main()
