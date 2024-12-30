@@ -46,28 +46,19 @@ def extract_markdown_links(text):
 
 
 
-#node = TextNode(
-    #"This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
-    #TextType.TEXT,
-#)
-#new_nodes = split_nodes_link([node])
-# [
-#     TextNode("This is text with a link ", TextType.TEXT),
-#     TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
-#     TextNode(" and ", TextType.TEXT),
-#     TextNode(
-#         "to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev"
-#     ),
-# ]
+node = TextNode(
+    "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+    TextType.TEXT,
+)
 
 
 def split_nodes_link(old_nodes):
     #takes a list of nodes and identify the links in them, and return a list of all the nodes with the proper text type.
-    #image syntax: ![alt text](url_here)
+    #link syntax: [alt text](url_here)
     text_node_list = []
     for node in old_nodes:
         #check if the extract markdown links function created anything
-        links = extract_markdown_links(old_nodes)
+        links = extract_markdown_links(node.text)
         if len(links) == 0:
             #no links, just add the text node to the list as normal
             if len(node.text) > 0:
@@ -76,20 +67,71 @@ def split_nodes_link(old_nodes):
 
         node_text = node.text
 
-        #there is at least one link and it's set up as a list of tuples [(alt text,url)(alt text,url)]. go through each tuple in the list
-        #and save the alt. We want to  and append it as a new link to the text node
-        for link_details in links:
-            this_node_components = []
-            alt = link_details[0]
-            url = link_details[1]
-            #split the current node's text at the md link to a max of 2 items
-            split_text = node_text.split(f"[{alt}]({url})", 1)
-            this_node_components.append(TextNode(node_text[1],TextType.TEXT))
-            this_node_components.append(TextNode(f"[{alt}]({url})"))
+        while len(links) > 0:
+            #check if links are in the node_text
+            links = extract_markdown_links(node_text)
+            for link_details in links:
+                alt = link_details[0]
+                url = link_details[1]
+                #split the node text at the link
+                split_text = node_text.split(f"[{alt}]({url})", 1)
+                #append split_text[0] to the overall list
+                text_node_list.append(TextNode(split_text[0],TextType.TEXT))
+                text_node_list.append(TextNode(f"[{alt}]({url})",TextType.LINK,url))
+                node_text = split_text[1]
+        
+        if node_text:
+            text_node_list.append(TextNode(node_text, TextType.TEXT))
+        
+    return text_node_list
+
+def split_nodes_images(old_nodes):
+    #takes a list of nodes and identify the images in them, and return a list of all the nodes with the proper text type.
+    #image syntax: ![alt text](url_here)
+    text_node_list = []
+    for node in old_nodes:
+        #check if the extract markdown links function created anything
+        images = extract_markdown_images(node.text)
+        if len(images) == 0:
+            #no links, just add the text node to the list as normal
+            if len(node.text) > 0:
+                text_node_list.append(node)
+            continue
+
+        node_text = node.text
+
+        while len(images) > 0:
+            #check if links are in the node_text
+            images = extract_markdown_links(node_text)
+            for img_details in images:
+                alt = img_details[0]
+                url = img_details[1]
+                #split the node text at the link
+                split_text = node_text.split(f"[{alt}]({url})", 1)
+                #append split_text[0] to the overall list
+                text_node_list.append(TextNode(split_text[0],TextType.TEXT))
+                text_node_list.append(TextNode(f"![{alt}]({url})",TextType.IMAGE))
+                node_text = split_text[1]
+        
+        if node_text:
+            text_node_list.append(TextNode(node_text, TextType.TEXT))
+        
+    return text_node_list
             
-            #the node has been split and added to this_node_components
-            
 
 
-    return ""
 
+node = TextNode(
+    "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+    TextType.TEXT,
+)
+node2 = TextNode(
+    "[a link to google](https://google.com) [followed by a link to facebook](https://facebook.com). Oh the humanity!",
+    TextType.TEXT,
+)
+node3 = TextNode(
+    "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+    TextType.TEXT,
+)
+new_nodes = split_nodes_link([node2])
+print(new_nodes)
