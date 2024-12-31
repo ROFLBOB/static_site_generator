@@ -44,14 +44,6 @@ def extract_markdown_links(text):
         matched_tuples.append(tuple(match))
     return matched_tuples
 
-
-
-node = TextNode(
-    "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
-    TextType.TEXT,
-)
-
-
 def split_nodes_link(old_nodes):
     #takes a list of nodes and identify the links in them, and return a list of all the nodes with the proper text type.
     #link syntax: [alt text](url_here)
@@ -77,7 +69,7 @@ def split_nodes_link(old_nodes):
                 split_text = node_text.split(f"[{alt}]({url})", 1)
                 #append split_text[0] to the overall list
                 text_node_list.append(TextNode(split_text[0],TextType.TEXT))
-                text_node_list.append(TextNode(f"[{alt}]({url})",TextType.LINK,url))
+                text_node_list.append(TextNode(f"{alt}",TextType.LINK,url))
                 node_text = split_text[1]
         
         if node_text:
@@ -107,31 +99,39 @@ def split_nodes_images(old_nodes):
                 alt = img_details[0]
                 url = img_details[1]
                 #split the node text at the link
-                split_text = node_text.split(f"[{alt}]({url})", 1)
+                split_text = node_text.split(f"![{alt}]({url})", 1)
                 #append split_text[0] to the overall list
                 text_node_list.append(TextNode(split_text[0],TextType.TEXT))
-                text_node_list.append(TextNode(f"![{alt}]({url})",TextType.IMAGE))
-                node_text = split_text[1]
-        
+                text_node_list.append(TextNode(f"{alt}",TextType.IMAGE,url))
+                if len(split_text) == 2:
+                    node_text = split_text[1]
+                        
         if node_text:
             text_node_list.append(TextNode(node_text, TextType.TEXT))
         
     return text_node_list
-            
+
+def text_to_textnodes(text):
+    #when given md text, it outputs a list of textnodes with their proper types
+    #apply all splitting functions to the text
+    
+    #convert to a textnode
+    text_node = TextNode(text, TextType.TEXT)
+    converted_nodes = split_nodes_delimiter([text_node], "**", TextType.BOLD)
+    converted_nodes = split_nodes_delimiter([text_node], "*", TextType.ITALIC)
+    converted_nodes = split_nodes_delimiter([text_node], "`", TextType.CODE)
+    converted_nodes = split_nodes_images([text_node])
+    converted_nodes = split_nodes_link([text_node])
+ 
+    
 
 
 
-node = TextNode(
-    "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
-    TextType.TEXT,
-)
-node2 = TextNode(
-    "[a link to google](https://google.com) [followed by a link to facebook](https://facebook.com). Oh the humanity!",
-    TextType.TEXT,
-)
-node3 = TextNode(
-    "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
-    TextType.TEXT,
-)
-new_nodes = split_nodes_link([node2])
-print(new_nodes)
+    return converted_nodes
+
+print(text_to_textnodes("**this is bold text**"))
+print(text_to_textnodes("*this is italic text*"))
+print(text_to_textnodes("`this is code text`"))
+print(text_to_textnodes("here is a link: [to google](https://google.com)"))
+print(text_to_textnodes("and my friend, an image of my dog ![an image](http://mydog.com/dog.jpg)"))
+print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"))
