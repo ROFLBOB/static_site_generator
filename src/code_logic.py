@@ -30,7 +30,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 def extract_markdown_images(text):
     #takes raw markdown text and returns a list of tuples (alt text, URL)
     matched_images = re.findall(r"!\[(.*?)\]\((.*?)\)", text)
-    #matched images = "[![rick rolll](https://i.imgur.com/aKa0qIh.gif)]"
     matched_tuples = []
     for match in matched_images:
         matched_tuples.append(tuple(match))
@@ -118,10 +117,10 @@ def text_to_textnodes(text):
     #convert to a textnode
     text_node = TextNode(text, TextType.TEXT)
     converted_nodes = split_nodes_delimiter([text_node], "**", TextType.BOLD)
-    converted_nodes = split_nodes_delimiter([text_node], "*", TextType.ITALIC)
-    converted_nodes = split_nodes_delimiter([text_node], "`", TextType.CODE)
-    converted_nodes = split_nodes_images([text_node])
-    converted_nodes = split_nodes_link([text_node])
+    converted_nodes = split_nodes_delimiter([converted_nodes], "*", TextType.ITALIC)
+    converted_nodes = split_nodes_delimiter([converted_nodes, "`", TextType.CODE])
+    converted_nodes = split_nodes_images([converted_nodes])
+    converted_nodes = split_nodes_link([converted_nodes])
  
     
 
@@ -129,9 +128,10 @@ def text_to_textnodes(text):
 
     return converted_nodes
 
-print(text_to_textnodes("**this is bold text**"))
-print(text_to_textnodes("*this is italic text*"))
-print(text_to_textnodes("`this is code text`"))
-print(text_to_textnodes("here is a link: [to google](https://google.com)"))
-print(text_to_textnodes("and my friend, an image of my dog ![an image](http://mydog.com/dog.jpg)"))
-print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"))
+#print(text_to_textnodes("**this is bold text**"))
+#print(text_to_textnodes("*this is italic text*"))
+#print(text_to_textnodes("`this is code text`"))
+#print(text_to_textnodes("here is a link: [to google](https://google.com)"))
+#print(text_to_textnodes("and my friend, an image of my dog ![an image](http://mydog.com/dog.jpg)"))
+#print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"))
+print(text_to_textnodes("![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg)"))
