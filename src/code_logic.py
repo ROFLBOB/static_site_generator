@@ -1,4 +1,5 @@
 from textnode import TextNode, TextType, text_node_to_html_node
+from htmlnode import HTMLNode, ParentNode, LeafNode
 import re
 
 #split_nodes_delimiter: takes a list of text nodes and splits it according to the delimiter.
@@ -220,7 +221,25 @@ unordered_list = "* an unordered list item\n* the second item\n* The third item"
 ordered_list = "1. first item of ordered list\n2. second item and \n3. third item"
 regular_text = "this is just regular paragraph text"
 
-tests = [h1heading, h2heading, h3heading, code_block, quote_block, unordered_list, ordered_list, regular_text]
+#tests = [h1heading, h2heading, h3heading, code_block, quote_block, unordered_list, ordered_list, regular_text]
 
-for test in tests:
-    print(f"\"{test}\" is a {block_to_block_type(test)}")
+#for test in tests:
+    #print(f"\"{test}\" is a {block_to_block_type(test)}")
+
+def markdown_to_html_node(markdown):
+    #returns a parent htmlnode that contains many child htmlnodes representing the nested elements
+    
+    
+    #split markdown into blocks
+    all_blocks = markdown_to_blocks(markdown)
+
+    for block in all_blocks:
+        #check what type of block it is
+        type = block_to_block_type(block)
+        match type:
+            case "paragraph":
+                return
+            case _:
+                return
+
+    return ""
