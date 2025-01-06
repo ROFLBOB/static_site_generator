@@ -44,10 +44,10 @@ def text_node_to_html_node(text_node):
             return "Not a valid text type."
     
 
-def test_text_node_to_html_node():
+'''def test_text_node_to_html_node():
     print(text_node_to_html_node(TextNode("normal text",TextType.TEXT, None)).to_html())
     print(text_node_to_html_node(TextNode("bold text",TextType.BOLD, None)).to_html())
     print(text_node_to_html_node(TextNode("italic text",TextType.ITALIC, None)).to_html())
     print(text_node_to_html_node(TextNode("coded text",TextType.CODE, None)).to_html())
     print(text_node_to_html_node(TextNode("a link to googs",TextType.LINK, "https://google.com")).to_html())
-    print(text_node_to_html_node(TextNode("an image",TextType.IMAGE, None)))
+    print(text_node_to_html_node(TextNode("an image",TextType.IMAGE, None)))'''

@@ -227,6 +227,27 @@ regular_text = "this is just regular paragraph text"""
 #for test in tests:
     #print(f"\"{test}\" is a {block_to_block_type(test)}")
 
+def convert_paragraph(block):
+    return LeafNode(block, "p", None)
+
+def convert_heading(block):
+    heading_level = block.find(" ")
+
+    return LeafNode(block, f"h{heading_level}", None)
+
+def convert_code(block):
+    code = block.replace("```", "")
+    return LeafNode(code, "code", None)
+
+def convert_quote(block):
+    split_lines = block.split("\n")
+    new_value = ""
+    for line in split_lines:
+        new_value += line[1:]
+    return LeafNode(new_value,"quote", None)
+        
+    
+
 def markdown_to_html_node(markdown):
     #returns a parent htmlnode that contains many child htmlnodes representing the nested elements
     
@@ -240,15 +261,10 @@ def markdown_to_html_node(markdown):
         type = block_to_block_type(block)
         match type:
             case "paragraph":
-                #return a new HTMLNode with the value of the paragraph
-
-                #check if there are children in the node
-                md_nodes.append(LeafNode(block,"p",None))
+                md_nodes.append(convert_paragraph(block))
             case "heading":
                 #count # to determine type of heading
-                heading_level = block.find(" ")
-
-                md_nodes.append(LeafNode(block,f"h{heading_level}",None))
+                md_nodes.append(convert_heading(block))
             case "code":
                 md_nodes.append(LeafNode(block,"code", None))
             case "quote":
