@@ -135,12 +135,6 @@ def text_to_textnodes(text):
         print("After images: ", converted_nodes)
     except Exception as e:
         print("Error in split_nodes_link: ", e)
-    
- 
-    
-
-
-
     return converted_nodes
 
 #print(text_to_textnodes("**this is bold text**"))
@@ -201,8 +195,8 @@ def block_to_block_type(md_block):
         return block_type_quote
     # check for ordered list
     is_ol = False
-    is_ul = True
-    for y in range(len(split_line)-1):
+    is_ul = False
+    for y in range(len(split_line)):
         if split_line[y].startswith(f"{y+1}. "):
             is_ol = True
         elif split_line[y].startswith("* ") or split_line[y].startswith("- "):
@@ -219,14 +213,14 @@ def block_to_block_type(md_block):
     return block_type_paragraph
 
 
-h1heading = "# An h1 heading here"
+"""h1heading = "# An h1 heading here"
 h2heading = "## This is a h2 heading"
 h3heading = "### This is an h3 heading"
 code_block = "```\nThis is a code block\n```"
 quote_block = ">this is a quote block\n>on two lines"
 unordered_list = "* an unordered list item\n* the second item\n* The third item"
 ordered_list = "1. first item of ordered list\n2. second item and \n3. third item"
-regular_text = "this is just regular paragraph text"
+regular_text = "this is just regular paragraph text"""
 
 #tests = [h1heading, h2heading, h3heading, code_block, quote_block, unordered_list, ordered_list, regular_text]
 
@@ -241,7 +235,6 @@ def markdown_to_html_node(markdown):
 
     #split markdown into blocks
     all_blocks = markdown_to_blocks(markdown)
-
     for block in all_blocks:
         #check what type of block it is
         type = block_to_block_type(block)
@@ -250,19 +243,27 @@ def markdown_to_html_node(markdown):
                 #return a new HTMLNode with the value of the paragraph
 
                 #check if there are children in the node
+                md_nodes.append(LeafNode(block,"p",None))
+            case "heading":
+                #count # to determine type of heading
+                heading_level = block.find(" ")
 
-                return ("p", block)
-            case block_type_heading:
-                pass
-            case block_type_code:
-                pass
-            case block_type_quote:
-                pass
-            case block_type_olist:
-                pass
-            case block_type_ulist:
-                pass
+                md_nodes.append(LeafNode(block,f"h{heading_level}",None))
+            case "code":
+                md_nodes.append(LeafNode(block,"code", None))
+            case "quote":
+                md_nodes.append(LeafNode(block,"code", None))
+            case "ordered_list":
+                md_nodes.append(LeafNode(block,"ol", None))
+            case "unordered_list":
+                md_nodes.append(LeafNode(block,"ul", None))
             case _:
-                pass
+                print("nothing identified")
 
+    return md_nodes
+
+def text_to_children(text):
+    #takes a string of text and returns a list of HTMLNodes that represetn the lineline markdown using previously created function
     return ""
+
+print(markdown_to_html_node("# The Heading\n\nThis is a paragraph\n\n- a list item\n- a second list item\n- a third item\n\n```a converted code block```"))
