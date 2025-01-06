@@ -151,6 +151,13 @@ def text_to_textnodes(text):
 #print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)."))
 #print(text_to_textnodes("![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg)"))
 
+block_type_paragraph = "paragraph"
+block_type_heading = "heading"
+block_type_code = "code"
+block_type_quote = "quote"
+block_type_olist = "ordered_list"
+block_type_ulist = "unordered_list"
+
 def markdown_to_blocks(markdown):
     #take raw markdown string (a full document) as input and returns a list of "block" strings
     #md blocks are separated by a blank, empty line. 
@@ -178,10 +185,10 @@ def block_to_block_type(md_block):
     #look for header start with regex
     x = re.search(r"^#{1,6}\s",md_block)
     if x != None:
-        return "heading"
+        return block_type_heading
     #look for 3 backticks at start and end for code blocks
     if md_block.startswith("```") and md_block.endswith("```"):
-        return "code"
+        return block_type_code
     #look for > at start of each line for code block
     split_line = md_block.splitlines()
     is_quote = False
@@ -191,7 +198,7 @@ def block_to_block_type(md_block):
             break
         is_quote = True
     if is_quote:
-        return "quote"
+        return block_type_quote
     # check for ordered list
     is_ol = False
     is_ul = True
@@ -205,11 +212,11 @@ def block_to_block_type(md_block):
             is_ul = False
             break
     if is_ol:
-        return "ordered_list"
+        return block_type_olist
     if is_ul:
-        return "unordered_list"
+        return block_type_ulist
     
-    return "paragraph"
+    return block_type_paragraph
 
 
 h1heading = "# An h1 heading here"
@@ -229,7 +236,9 @@ regular_text = "this is just regular paragraph text"
 def markdown_to_html_node(markdown):
     #returns a parent htmlnode that contains many child htmlnodes representing the nested elements
     
-    
+    md_nodes = []
+    html_file = ParentNode("div", md_nodes, None)
+
     #split markdown into blocks
     all_blocks = markdown_to_blocks(markdown)
 
@@ -238,8 +247,22 @@ def markdown_to_html_node(markdown):
         type = block_to_block_type(block)
         match type:
             case "paragraph":
-                return
+                #return a new HTMLNode with the value of the paragraph
+
+                #check if there are children in the node
+
+                return ("p", block)
+            case block_type_heading:
+                pass
+            case block_type_code:
+                pass
+            case block_type_quote:
+                pass
+            case block_type_olist:
+                pass
+            case block_type_ulist:
+                pass
             case _:
-                return
+                pass
 
     return ""
