@@ -213,40 +213,52 @@ def block_to_block_type(md_block):
     return block_type_paragraph
 
 
-"""h1heading = "# An h1 heading here"
-h2heading = "## This is a h2 heading"
-h3heading = "### This is an h3 heading"
-code_block = "```\nThis is a code block\n```"
-quote_block = ">this is a quote block\n>on two lines"
-unordered_list = "* an unordered list item\n* the second item\n* The third item"
-ordered_list = "1. first item of ordered list\n2. second item and \n3. third item"
-regular_text = "this is just regular paragraph text"""
-
 #tests = [h1heading, h2heading, h3heading, code_block, quote_block, unordered_list, ordered_list, regular_text]
 
 #for test in tests:
     #print(f"\"{test}\" is a {block_to_block_type(test)}")
 
 def convert_paragraph(block):
-    return LeafNode(block, "p", None)
+    text_nodes = text_to_children(block)
+    return ParentNode("p",text_nodes)
+
+
 
 def convert_heading(block):
     heading_level = block.find(" ")
 
     return LeafNode(block, f"h{heading_level}", None)
 
+
 def convert_code(block):
     code = block.replace("```", "")
-    return LeafNode(code, "code", None)
+    return LeafNode(code, "pre", None)
 
 def convert_quote(block):
     split_lines = block.split("\n")
     new_value = ""
     for line in split_lines:
-        new_value += line[1:]
-    return LeafNode(new_value,"quote", None)
+        new_value += f"{line[1:]}\n"
+    return LeafNode(new_value,"blockquote", None)
+
+def convert_unordered_list(block):
+    split_lines = block.split("\n")
+    new_value = []
+    for line in split_lines:
+
+        new_value.append(LeafNode(f"{line[2:]}", "li"))
         
-    
+    return ParentNode("ul", new_value)
+
+        
+def convert_ordered_list(block):
+    split_lines = block.split("\n")
+    new_value = []
+    for line in split_lines:
+
+        new_value.append(LeafNode(f"{line[2:]}", "li"))
+        
+    return ParentNode("ol", new_value)
 
 def markdown_to_html_node(markdown):
     #returns a parent htmlnode that contains many child htmlnodes representing the nested elements
@@ -266,20 +278,26 @@ def markdown_to_html_node(markdown):
                 #count # to determine type of heading
                 md_nodes.append(convert_heading(block))
             case "code":
-                md_nodes.append(LeafNode(block,"code", None))
+                md_nodes.append(convert_code(block))
             case "quote":
-                md_nodes.append(LeafNode(block,"code", None))
+                md_nodes.append(convert_quote(block))
             case "ordered_list":
-                md_nodes.append(LeafNode(block,"ol", None))
+                md_nodes.append(convert_ordered_list(block))
             case "unordered_list":
-                md_nodes.append(LeafNode(block,"ul", None))
+                md_nodes.append(convert_unordered_list(block))
             case _:
                 print("nothing identified")
 
-    return md_nodes
+    return html_file
 
 def text_to_children(text):
-    #takes a string of text and returns a list of HTMLNodes that represetn the lineline markdown using previously created function
-    return ""
+    #takes a string of text and returns a list of HTMLNodes that represetn the line markdown using previously created function
+    #id the inline elements
+    text_nodes = text_to_textnodes(text)
+    children = []
+    for text_node in text_nodes:
+        html_node = text_node_to_html_node(text_node)
+        children.append(html_node)
+    return children
 
-print(markdown_to_html_node("# The Heading\n\nThis is a paragraph\n\n- a list item\n- a second list item\n- a third item\n\n```a converted code block```"))
+#print(convert_paragraph("This is a paragraph with a [link in it](https://google.com). Here's another sentence."))
