@@ -116,34 +116,26 @@ def text_to_textnodes(text):
     
     #convert to a textnode
     text_node = [TextNode(text, TextType.TEXT)]
-    print("Initial node: ", text_node)
+    #print("Initial node: ", text_node)
     converted_nodes = split_nodes_delimiter(text_node, "**", TextType.BOLD)
-    print("After bold: ", converted_nodes)
+    #print("After bold: ", converted_nodes)
     converted_nodes = split_nodes_delimiter(converted_nodes, "*", TextType.ITALIC)
-    print("After italics: ", converted_nodes)
+    #print("After italics: ", converted_nodes)
     converted_nodes = split_nodes_delimiter(converted_nodes, "`", TextType.CODE)
-    print("After code: ", converted_nodes)
+    #print("After code: ", converted_nodes)
     
     try: 
         converted_nodes = split_nodes_images(converted_nodes)
-        print("After images: ", converted_nodes)
+        #print("After images: ", converted_nodes)
     except Exception as e:
         print("Error in split_nodes_images: ", e)
 
     try: 
         converted_nodes = split_nodes_link(converted_nodes)
-        print("After images: ", converted_nodes)
+        #print("After images: ", converted_nodes)
     except Exception as e:
         print("Error in split_nodes_link: ", e)
     return converted_nodes
-
-#print(text_to_textnodes("**this is bold text**"))
-#print(text_to_textnodes("*this is italic text*"))
-#print(text_to_textnodes("`this is code text`"))
-#print(text_to_textnodes("here is a link: [to google](https://google.com)"))
-#print(text_to_textnodes("and my friend, an image of my dog: ![an image](http://mydog.com/dog.jpg)"))
-#print(text_to_textnodes("This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)."))
-#print(text_to_textnodes("![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg)"))
 
 block_type_paragraph = "paragraph"
 block_type_heading = "heading"
@@ -172,127 +164,114 @@ def markdown_to_blocks(markdown):
     
     return markdown_list
 
-def block_to_block_type(md_block):
-    # determine what kind of block md_block is (markdown string)
-    #supports h1-6, code blocks, quote blocks, ul and ol, and normal text
+def block_to_block_type(block):
+    lines = block.split("\n")
 
-    #look for header start with regex
-    x = re.search(r"^#{1,6}\s",md_block)
-    if x != None:
+    if block.startswith(("#", "##", "###", "####", "#####", "######")):
         return block_type_heading
-    #look for 3 backticks at start and end for code blocks
-    if md_block.startswith("```") and md_block.endswith("```"):
+    if len(lines) > 1 and lines[0].startswith("```") and lines[-1].startswith("```"):
         return block_type_code
-    #look for > at start of each line for code block
-    split_line = md_block.splitlines()
-    is_quote = False
-    for line in split_line:
-        if line.startswith(">") == False:
-            is_quote = False
-            break
-        is_quote = True
-    if is_quote:
+    if block.startswith(">"):
+        for line in lines:
+            if not line.startswith(">"):
+                return block_type_paragraph
         return block_type_quote
-    # check for ordered list
-    is_ol = False
-    is_ul = False
-    for y in range(len(split_line)):
-        if split_line[y].startswith(f"{y+1}. "):
-            is_ol = True
-        elif split_line[y].startswith("* ") or split_line[y].startswith("- "):
-            is_ul = True
-        else:
-            is_ol = False
-            is_ul = False
-            break
-    if is_ol:
-        return block_type_olist
-    if is_ul:
+    if block.startswith("* "):
+        for line in lines:
+            if not line.startswith("* "):
+                return block_type_paragraph
         return block_type_ulist
-    
+    if block.startswith("1. "):
+        i = 1
+        for line in lines:
+            if not line.startswith(f"{i}. "):
+                return block_type_paragraph
+        i += 1
+        return block_type_olist
     return block_type_paragraph
 
-
-#tests = [h1heading, h2heading, h3heading, code_block, quote_block, unordered_list, ordered_list, regular_text]
-
-#for test in tests:
-    #print(f"\"{test}\" is a {block_to_block_type(test)}")
-
 def convert_paragraph(block):
+    #convert a paragraph block to HTML node
     text_nodes = text_to_children(block)
+
     return ParentNode("p",text_nodes)
 
 
 
 def convert_heading(block):
     heading_level = block.find(" ")
-
-    return LeafNode(block, f"h{heading_level}", None)
+    children = text_to_children(block)
+    return ParentNode(f"h{heading_level}", children)
 
 
 def convert_code(block):
-    code = block.replace("```", "")
-    return LeafNode(code, "pre", None)
+    if not block.startswith("```") or not block.endswith("```"):
+        raise ValueError("Invalid code block")
+    code = block[4:-3]
+    children = text_to_chilldren(code)
+    return ParentNode("pre", children)
 
 def convert_quote(block):
     split_lines = block.split("\n")
-    new_value = ""
+    new_value = []
     for line in split_lines:
-        new_value += f"{line[1:]}\n"
-    return LeafNode(new_value,"blockquote", None)
+        if not line.startswith(">"):
+            raise ValueError("Invalid quote block")    
+        new_value.append(line.lstrip(">").strip())
+    content = " ".join(new_value)
+    children = text_to_children(content)
+    return ParentNode("blockquote", children)
 
 def convert_unordered_list(block):
     split_lines = block.split("\n")
-    new_value = []
-    for line in split_lines:
-
-        new_value.append(LeafNode(f"{line[2:]}", "li"))
-        
-    return ParentNode("ul", new_value)
+    html_items = []
+    for item in split_lines:
+        text = item[2:]
+        children = text_to_children(text)
+        html_items.append(ParentNode("li", children))
+    return ParentNode("ul", html_items)
 
         
 def convert_ordered_list(block):
-    split_lines = block.split("\n")
-    new_value = []
-    for line in split_lines:
-
-        new_value.append(LeafNode(f"{line[2:]}", "li"))
-        
-    return ParentNode("ol", new_value)
+    items = block.split('\n')
+    html_items = []
+    for item in items:
+        text = item[3:]
+        children = text_to_children(text)
+        html_items.append(ParentNode("li",children))
+    return ParentNode("ol",html_items)
 
 def markdown_to_html_node(markdown):
     #returns a parent htmlnode that contains many child htmlnodes representing the nested elements
-    
-    md_nodes = []
-    html_file = ParentNode("div", md_nodes, None)
+    blocks = markdown_to_blocks(markdown)
+    children = []
+    for block in blocks:
+        html_node = block_to_html_node(block)
+        children.append(html_node)
+    return ParentNode("div", children, None)
 
-    #split markdown into blocks
-    all_blocks = markdown_to_blocks(markdown)
-    for block in all_blocks:
-        #check what type of block it is
-        type = block_to_block_type(block)
-        match type:
-            case "paragraph":
-                md_nodes.append(convert_paragraph(block))
-            case "heading":
-                #count # to determine type of heading
-                md_nodes.append(convert_heading(block))
-            case "code":
-                md_nodes.append(convert_code(block))
-            case "quote":
-                md_nodes.append(convert_quote(block))
-            case "ordered_list":
-                md_nodes.append(convert_ordered_list(block))
-            case "unordered_list":
-                md_nodes.append(convert_unordered_list(block))
-            case _:
-                print("nothing identified")
+def block_to_html_node(block):
+    block_type = block_to_block_type(block)
+    if block_type == block_type_paragraph:
+        return convert_paragraph(block)
+    if block_type == block_type_heading:
+        return convert_heading(block)
+    if block_type == block_type_code:
+        return convert_code(block)
+    if block_type == block_type_olist:
+        return convert_ordered_list(block)
+    if block_type == block_type_ulist:
+        return convert_unordered_list(block)
+    if block_type == block_type_quote:
+        return convert_quote(block)
+    raise ValueError("Invalid block type")
 
-    return html_file
 
 def text_to_children(text):
     #takes a string of text and returns a list of HTMLNodes that represetn the line markdown using previously created function
     #id the inline elements
+
+    #converts the text to text nodes
     text_nodes = text_to_textnodes(text)
     children = []
     for text_node in text_nodes:
@@ -300,4 +279,43 @@ def text_to_children(text):
         children.append(html_node)
     return children
 
-#print(convert_paragraph("This is a paragraph with a [link in it](https://google.com). Here's another sentence."))
+paragraph = """
+This is **bolded** paragraph
+text in a p tag here
+"""
+
+multiple_paragraphs = """
+This is a **bolded** paragraph
+text in a p tag
+tag here
+
+This is another paragraph with *italic* text and `code` here
+"""
+
+lists = """
+- This is a list
+- with items
+- and *more* items
+
+1. This is an ordered list
+2. with items
+3. and **more** items
+"""
+
+headings = """# this is an h1
+
+this is paragraph text
+
+## this is h2
+
+and another paragraph
+"""
+
+tests = [paragraph, multiple_paragraphs, lists, headings]
+
+for test in tests:
+    test_node = markdown_to_html_node(test)
+    html = test_node.to_html()
+    print(f"Testing...\n")
+    print(html)
+    print("\n")
