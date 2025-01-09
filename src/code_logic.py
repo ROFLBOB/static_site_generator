@@ -156,7 +156,7 @@ def markdown_to_blocks(markdown):
         block = block.strip()
         filtered_blocks.append(block)
     
-    return markdown_list
+    return filtered_blocks
 
 def block_to_block_type(block):
     lines = block.split("\n")
@@ -193,10 +193,17 @@ def convert_paragraph(block):
 
 
 def convert_heading(block):
-    heading_level = block.find(" ")
-    children = text_to_children(block)
-    return ParentNode(f"h{heading_level}", children)
-
+    level = 0
+    for char in block:
+        if char == "#":
+            level += 1
+        else:
+            break
+    if level + 1 >= len(block):
+        raise ValueError(f"Invalid heading level: {level}")
+    text = block[level + 1 :]
+    children= text_to_children(text)
+    return ParentNode(f"h{level}", children)
 
 def convert_code(block):
     if not block.startswith("```") or not block.endswith("```"):
@@ -313,3 +320,5 @@ for test in tests:
     print(f"Testing...\n")
     print(html)
     print("\n")
+
+#print(markdown_to_blocks(tests[0]))
