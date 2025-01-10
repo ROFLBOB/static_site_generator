@@ -1,4 +1,4 @@
-from code_logic import markdown_to_blocks
+from code_logic import markdown_to_blocks, markdown_to_html_node
 
 def extract_title(markdown):
     #pull the h1 header from the md file and return it
@@ -11,15 +11,33 @@ def extract_title(markdown):
             return f"{block[2:]}"
     
     raise Exception("No valid h1")
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     
-md = """
-the first paragraph
+    #read and store the md file, template file
+    markdown_file = open(from_path)
+    markdown = markdown_file.read()
+    markdown_file.close()
+    template_file = open(template_path)
+    template = template_file.read()
+    template_file.close()
 
-## an h2
+    #use the markdown_to_html_node function and .to_html() to convert the md file to an html string
 
-# This is the title
+    html_node = markdown_to_html_node(markdown)
+    html = html_node.to_html()
 
-and this is the body
-"""
+    #extract the title from the markdown
+    h1_title = extract_title(markdown)
 
-print(extract_title(md))
+    #replace the {{ Title }} and {{ Content }} placeholders in the template with the html and title that were generated
+    template = template.replace("{{ Title }}", h1_title)
+    template = template.replace("{{ Content }}", html)
+
+    #write the new full html page to a file at dest_path. create any necessary directories if they don't exist
+    
+
+
+
+    return ""
