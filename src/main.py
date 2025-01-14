@@ -1,7 +1,7 @@
 
 from textnode import TextNode, TextType
 from test_textnode import TestTextNode
-from generate_page import generate_page
+from generate_page import generate_page, generate_pages_recursive
 import os #checking if files exist, navigation
 import shutil #copy files
 
@@ -10,7 +10,8 @@ def main():
     source = 'static'
     destination = 'public'
     copy_source_directory(source,destination)
-    generate_page('content/index.md','template.html','public/index.html')
+    #generate_page('content/index.md','template.html','public/index.html')
+    generate_pages_recursive('content/','template.html','public/')
 
 def copy_source_directory(source, destination): #copies all contents from source directory to the destination directory
     #it should first delete all the contents of the destination directory to ensure the copy is clean
