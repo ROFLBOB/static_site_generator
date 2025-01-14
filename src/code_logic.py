@@ -180,7 +180,7 @@ def block_to_block_type(block):
         for line in lines:
             if not line.startswith(f"{i}. "):
                 return block_type_paragraph
-        i += 1
+            i += 1
         return block_type_olist
     return block_type_paragraph
 
@@ -209,7 +209,7 @@ def convert_code(block):
     if not block.startswith("```") or not block.endswith("```"):
         raise ValueError("Invalid code block")
     code = block[4:-3]
-    children = text_to_chilldren(code)
+    children = text_to_children(code)
     return ParentNode("pre", children)
 
 def convert_quote(block):
